@@ -6,6 +6,7 @@ import dev.worldmesh.regionworker.command.RegionCommand;
 import dev.worldmesh.regionworker.config.RegionConfig;
 import dev.worldmesh.regionworker.handoff.LoggingHandoffDispatcher;
 import dev.worldmesh.regionworker.handoff.LoggingHandoffReceiver;
+import dev.worldmesh.regionworker.logging.WorkerLogger;
 import dev.worldmesh.regionworker.world.RegionWorldGenerator;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -14,8 +15,11 @@ import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
+import org.slf4j.Logger;
 
 public final class Main {
+
+    private static final Logger LOGGER = WorkerLogger.logger(Main.class);
 
     private Main() {
     }
@@ -32,11 +36,11 @@ public final class Main {
         registerCommands(config);
         registerHandoffSystems(events, config);
 
-        System.out.println("Starting WorldMesh RegionWorker");
-        System.out.println("Region ID: " + config.regionId());
-        System.out.println("Bind: " + config.bindAddress());
-        System.out.println("Bounds: " + config.bounds().asDebugString());
-        System.out.println("Spawn: " + config.spawnPosition());
+        LOGGER.info("Starting WorldMesh RegionWorker");
+        LOGGER.info("Region ID: {}", config.regionId());
+        LOGGER.info("Bind: {}", config.bindAddress());
+        LOGGER.info("Bounds: {}", config.bounds().asDebugString());
+        LOGGER.info("Spawn: {}", config.spawnPosition());
 
         server.start(config.host(), config.port());
     }
@@ -77,6 +81,6 @@ public final class Main {
                 new LoggingHandoffDispatcher()
         ).register(events);
 
-        System.out.println("Registered handoff receiver: " + receiver.getClass().getSimpleName());
+        LOGGER.info("Registered handoff receiver: {}", receiver.getClass().getSimpleName());
     }
 }
