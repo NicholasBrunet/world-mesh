@@ -2,6 +2,7 @@ package dev.worldmesh.regionworker.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import dev.worldmesh.regionmodel.RegionBounds;
 import dev.worldmesh.regionmodel.RegionDirection;
@@ -78,6 +79,12 @@ public final class RegionConfig {
 
     public List<RegionNeighbor> neighbors() {
         return neighbors;
+    }
+
+    public Optional<RegionNeighbor> neighbor(RegionDirection direction) {
+        return neighbors.stream()
+                .filter(neighbor -> neighbor.direction() == direction)
+                .findFirst();
     }
 
     public String bindAddress() {

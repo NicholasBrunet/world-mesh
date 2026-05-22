@@ -1,6 +1,7 @@
 package dev.worldmesh.regionworker;
 
 import dev.worldmesh.regionmodel.RegionPosition;
+import dev.worldmesh.regionworker.border.BorderMonitor;
 import dev.worldmesh.regionworker.command.RegionCommand;
 import dev.worldmesh.regionworker.config.RegionConfig;
 import dev.worldmesh.regionworker.world.RegionWorldGenerator;
@@ -23,8 +24,11 @@ public final class Main {
         MinecraftServer server = MinecraftServer.init();
 
         InstanceContainer instance = createInstance();
-        registerPlayerSetup(instance, config);
+        GlobalEventHandler events = MinecraftServer.getGlobalEventHandler();
+
+        registerPlayerSetup(events, instance, config);
         registerCommands(config);
+        registerBorderMonitor(events, config);
 
         System.out.println("Starting WorldMesh RegionWorker");
         System.out.println("Region ID: " + config.regionId());
@@ -44,9 +48,11 @@ public final class Main {
         return instance;
     }
 
-    private static void registerPlayerSetup(InstanceContainer instance, RegionConfig config) {
-        GlobalEventHandler events = MinecraftServer.getGlobalEventHandler();
-
+    private static void registerPlayerSetup(
+            GlobalEventHandler events,
+            InstanceContainer instance,
+            RegionConfig config
+    ) {
         events.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             RegionPosition spawn = config.spawnPosition();
 
@@ -59,5 +65,9 @@ public final class Main {
 
     private static void registerCommands(RegionConfig config) {
         MinecraftServer.getCommandManager().register(new RegionCommand(config));
+    }
+
+    private static void registerBorderMonitor(GlobalEventHandler events, RegionConfig config) {
+        new BorderMonitor(config).register(events);
     }
 }
