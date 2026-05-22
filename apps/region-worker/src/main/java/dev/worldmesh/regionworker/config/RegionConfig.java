@@ -141,7 +141,7 @@ public final class RegionConfig {
         }
 
         try {
-            return Integer.parseInt(value);
+            return Integer.parseInt(value.trim());
         } catch (NumberFormatException error) {
             throw new IllegalArgumentException("Environment variable " + key + " must be an integer.", error);
         }
@@ -155,7 +155,7 @@ public final class RegionConfig {
         }
 
         try {
-            return Double.parseDouble(value);
+            return Double.parseDouble(value.trim());
         } catch (NumberFormatException error) {
             throw new IllegalArgumentException("Environment variable " + key + " must be a decimal number.", error);
         }
