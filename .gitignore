@@ -1,0 +1,39 @@
+# Build outputs
+.gradle/
+build/
+out/
+target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Context exports
+context_exports/
+
+# Java
+*.class
+
+# Docker local data
+docker-data/
+redis-data/
+
+# Python tooling
+__pycache__/
+*.pyc
+.venv/
+venv/
