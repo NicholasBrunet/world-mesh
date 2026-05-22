@@ -1,5 +1,6 @@
 package dev.worldmesh.regionworker;
 
+import dev.worldmesh.regionmodel.RegionPosition;
 import dev.worldmesh.regionworker.command.RegionCommand;
 import dev.worldmesh.regionworker.config.RegionConfig;
 import dev.worldmesh.regionworker.world.RegionWorldGenerator;
@@ -22,12 +23,14 @@ public final class Main {
         MinecraftServer server = MinecraftServer.init();
 
         InstanceContainer instance = createInstance();
-        registerPlayerSetup(instance);
+        registerPlayerSetup(instance, config);
         registerCommands(config);
 
         System.out.println("Starting WorldMesh RegionWorker");
         System.out.println("Region ID: " + config.regionId());
         System.out.println("Bind: " + config.bindAddress());
+        System.out.println("Bounds: " + config.bounds().asDebugString());
+        System.out.println("Spawn: " + config.spawnPosition());
 
         server.start(config.host(), config.port());
     }
@@ -41,13 +44,15 @@ public final class Main {
         return instance;
     }
 
-    private static void registerPlayerSetup(InstanceContainer instance) {
+    private static void registerPlayerSetup(InstanceContainer instance, RegionConfig config) {
         GlobalEventHandler events = MinecraftServer.getGlobalEventHandler();
 
         events.addListener(AsyncPlayerConfigurationEvent.class, event -> {
+            RegionPosition spawn = config.spawnPosition();
+
             event.setSpawningInstance(instance);
 
-            event.getPlayer().setRespawnPoint(new Pos(0, 42, 0));
+            event.getPlayer().setRespawnPoint(new Pos(spawn.x(), spawn.y(), spawn.z()));
             event.getPlayer().setGameMode(GameMode.CREATIVE);
         });
     }

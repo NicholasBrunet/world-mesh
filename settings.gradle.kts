@@ -15,4 +15,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "worldmesh"
 
+include("apps")
 include("apps:region-worker")
+
+include("packages")
+include("packages:region-model")
