@@ -5,6 +5,7 @@ import dev.worldmesh.regionworker.border.BorderMonitor;
 import dev.worldmesh.regionworker.command.RegionCommand;
 import dev.worldmesh.regionworker.config.RegionConfig;
 import dev.worldmesh.regionworker.handoff.LoggingHandoffDispatcher;
+import dev.worldmesh.regionworker.handoff.LoggingHandoffReceiver;
 import dev.worldmesh.regionworker.world.RegionWorldGenerator;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -29,7 +30,7 @@ public final class Main {
 
         registerPlayerSetup(events, instance, config);
         registerCommands(config);
-        registerBorderMonitor(events, config);
+        registerHandoffSystems(events, config);
 
         System.out.println("Starting WorldMesh RegionWorker");
         System.out.println("Region ID: " + config.regionId());
@@ -68,10 +69,14 @@ public final class Main {
         MinecraftServer.getCommandManager().register(new RegionCommand(config));
     }
 
-    private static void registerBorderMonitor(GlobalEventHandler events, RegionConfig config) {
+    private static void registerHandoffSystems(GlobalEventHandler events, RegionConfig config) {
+        LoggingHandoffReceiver receiver = new LoggingHandoffReceiver(config);
+
         new BorderMonitor(
                 config,
                 new LoggingHandoffDispatcher()
         ).register(events);
+
+        System.out.println("Registered handoff receiver: " + receiver.getClass().getSimpleName());
     }
 }
