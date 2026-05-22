@@ -20,3 +20,4 @@ include("apps:region-worker")
 
 include("packages")
 include("packages:region-model")
+include("packages:transfer-model")

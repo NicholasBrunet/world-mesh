@@ -1,17 +1,19 @@
 package dev.worldmesh.regionworker.border;
 
-import dev.worldmesh.regionmodel.RegionDirection;
-import dev.worldmesh.regionmodel.RegionNeighbor;
-import dev.worldmesh.regionworker.config.RegionConfig;
-import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.Pos;
-import net.minestom.server.event.GlobalEventHandler;
-import net.minestom.server.event.player.PlayerMoveEvent;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import dev.worldmesh.regionmodel.RegionDirection;
+import dev.worldmesh.regionmodel.RegionNeighbor;
+import dev.worldmesh.regionworker.config.RegionConfig;
+import dev.worldmesh.transfermodel.HandoffIntent;
+import dev.worldmesh.transfermodel.HandoffPosition;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.event.GlobalEventHandler;
+import net.minestom.server.event.player.PlayerMoveEvent;
 
 public final class BorderMonitor {
 
@@ -44,22 +46,7 @@ public final class BorderMonitor {
             return;
         }
 
-        if (neighbor.isPresent()) {
-            RegionNeighbor target = neighbor.get();
-
-            event.getPlayer().sendMessage(Component.text(
-                    "Border exit detected: " + exitDirection + " -> " + target.regionId()
-            ));
-
-            System.out.println(
-                    "Player " + playerId
-                            + " exited " + config.regionId()
-                            + " toward " + exitDirection
-                            + " target=" + target.regionId()
-                            + " endpoint=" + target.endpoint()
-                            + " position=" + position
-            );
-        } else {
+        if (neighbor.isEmpty()) {
             event.getPlayer().sendMessage(Component.text(
                     "Border exit detected: " + exitDirection + " but no neighbor is configured."
             ));
@@ -71,7 +58,32 @@ public final class BorderMonitor {
                             + " but no neighbor is configured"
                             + " position=" + position
             );
+
+            return;
         }
+
+        RegionNeighbor target = neighbor.get();
+
+        HandoffIntent intent = HandoffIntent.create(
+                playerId,
+                config.regionId(),
+                target.regionId(),
+                exitDirection,
+                new HandoffPosition(
+                        position.x(),
+                        position.y(),
+                        position.z(),
+                        position.yaw(),
+                        position.pitch()
+                )
+        );
+
+        event.getPlayer().sendMessage(Component.text(
+                "Handoff intent created: " + exitDirection + " -> " + target.regionId()
+        ));
+
+        System.out.println("Handoff intent created: " + intent.asDebugString());
+        System.out.println("Target endpoint: " + target.endpoint());
     }
 
     private boolean canSendMessage(UUID playerId) {
