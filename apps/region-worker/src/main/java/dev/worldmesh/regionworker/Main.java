@@ -4,6 +4,7 @@ import dev.worldmesh.regionmodel.RegionPosition;
 import dev.worldmesh.regionworker.border.BorderMonitor;
 import dev.worldmesh.regionworker.command.RegionCommand;
 import dev.worldmesh.regionworker.config.RegionConfig;
+import dev.worldmesh.regionworker.handoff.LoggingHandoffDispatcher;
 import dev.worldmesh.regionworker.world.RegionWorldGenerator;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -68,6 +69,9 @@ public final class Main {
     }
 
     private static void registerBorderMonitor(GlobalEventHandler events, RegionConfig config) {
-        new BorderMonitor(config).register(events);
+        new BorderMonitor(
+                config,
+                new LoggingHandoffDispatcher()
+        ).register(events);
     }
 }

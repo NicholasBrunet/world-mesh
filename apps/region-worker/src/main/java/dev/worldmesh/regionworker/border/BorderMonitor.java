@@ -8,6 +8,7 @@ import java.util.UUID;
 import dev.worldmesh.regionmodel.RegionDirection;
 import dev.worldmesh.regionmodel.RegionNeighbor;
 import dev.worldmesh.regionworker.config.RegionConfig;
+import dev.worldmesh.regionworker.handoff.HandoffDispatcher;
 import dev.worldmesh.transfermodel.HandoffIntent;
 import dev.worldmesh.transfermodel.HandoffPosition;
 import net.kyori.adventure.text.Component;
@@ -20,10 +21,12 @@ public final class BorderMonitor {
     private static final long MESSAGE_COOLDOWN_MILLIS = 1_500;
 
     private final RegionConfig config;
+    private final HandoffDispatcher handoffDispatcher;
     private final Map<UUID, Long> lastMessageTimes = new HashMap<>();
 
-    public BorderMonitor(RegionConfig config) {
+    public BorderMonitor(RegionConfig config, HandoffDispatcher handoffDispatcher) {
         this.config = config;
+        this.handoffDispatcher = handoffDispatcher;
     }
 
     public void register(GlobalEventHandler events) {
@@ -79,11 +82,10 @@ public final class BorderMonitor {
         );
 
         event.getPlayer().sendMessage(Component.text(
-                "Handoff intent created: " + exitDirection + " -> " + target.regionId()
+                "Handoff intent dispatched: " + exitDirection + " -> " + target.regionId()
         ));
 
-        System.out.println("Handoff intent created: " + intent.asDebugString());
-        System.out.println("Target endpoint: " + target.endpoint());
+        handoffDispatcher.dispatch(intent, target);
     }
 
     private boolean canSendMessage(UUID playerId) {
