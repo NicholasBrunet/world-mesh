@@ -1,5 +1,6 @@
 package dev.worldmesh.regionworker.command;
 
+import dev.worldmesh.regionmodel.RegionNeighbor;
 import dev.worldmesh.regionworker.config.RegionConfig;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.builder.Command;
@@ -15,10 +16,17 @@ public final class RegionCommand extends Command {
             sender.sendMessage(Component.text("Bind: " + config.bindAddress()));
             sender.sendMessage(Component.text("Bounds: " + config.bounds().asDebugString()));
             sender.sendMessage(Component.text("Spawn: " + config.spawnPosition()));
-            sender.sendMessage(Component.text("Nearest spawn boundary: " + config.bounds().exitDirection(
-                    config.spawnPosition().x(),
-                    config.spawnPosition().z()
-            )));
+
+            if (config.neighbors().isEmpty()) {
+                sender.sendMessage(Component.text("Neighbors: none"));
+                return;
+            }
+
+            sender.sendMessage(Component.text("Neighbors:"));
+
+            for (RegionNeighbor neighbor : config.neighbors()) {
+                sender.sendMessage(Component.text("- " + neighbor.asDebugString()));
+            }
         });
     }
 }

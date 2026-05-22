@@ -1,28 +1,37 @@
 package dev.worldmesh.regionworker.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import dev.worldmesh.regionmodel.RegionBounds;
+import dev.worldmesh.regionmodel.RegionDirection;
+import dev.worldmesh.regionmodel.RegionId;
+import dev.worldmesh.regionmodel.RegionNeighbor;
 import dev.worldmesh.regionmodel.RegionPosition;
 
 public final class RegionConfig {
 
-    private final String regionId;
+    private final RegionId regionId;
     private final String host;
     private final int port;
     private final RegionBounds bounds;
     private final RegionPosition spawnPosition;
+    private final List<RegionNeighbor> neighbors;
 
     private RegionConfig(
-            String regionId,
+            RegionId regionId,
             String host,
             int port,
             RegionBounds bounds,
-            RegionPosition spawnPosition
+            RegionPosition spawnPosition,
+            List<RegionNeighbor> neighbors
     ) {
         this.regionId = regionId;
         this.host = host;
         this.port = port;
         this.bounds = bounds;
         this.spawnPosition = spawnPosition;
+        this.neighbors = List.copyOf(neighbors);
     }
 
     public static RegionConfig fromEnvironment() {
@@ -38,15 +47,16 @@ public final class RegionConfig {
         );
 
         return new RegionConfig(
-                env("WORLD_MESH_REGION_ID", "region-dev"),
+                new RegionId(env("WORLD_MESH_REGION_ID", "region-dev")),
                 env("WORLD_MESH_HOST", "0.0.0.0"),
                 envInt("WORLD_MESH_PORT", 25565),
                 bounds,
-                spawnPosition
+                spawnPosition,
+                loadNeighbors()
         );
     }
 
-    public String regionId() {
+    public RegionId regionId() {
         return regionId;
     }
 
@@ -66,8 +76,44 @@ public final class RegionConfig {
         return spawnPosition;
     }
 
+    public List<RegionNeighbor> neighbors() {
+        return neighbors;
+    }
+
     public String bindAddress() {
         return host + ":" + port;
+    }
+
+    private static List<RegionNeighbor> loadNeighbors() {
+        List<RegionNeighbor> neighbors = new ArrayList<>();
+
+        addNeighborIfPresent(neighbors, RegionDirection.NORTH);
+        addNeighborIfPresent(neighbors, RegionDirection.SOUTH);
+        addNeighborIfPresent(neighbors, RegionDirection.EAST);
+        addNeighborIfPresent(neighbors, RegionDirection.WEST);
+
+        return neighbors;
+    }
+
+    private static void addNeighborIfPresent(List<RegionNeighbor> neighbors, RegionDirection direction) {
+        String prefix = "WORLD_MESH_NEIGHBOR_" + direction.name();
+
+        String regionId = System.getenv(prefix + "_ID");
+        String endpoint = System.getenv(prefix + "_ENDPOINT");
+
+        if (regionId == null || regionId.isBlank()) {
+            return;
+        }
+
+        if (endpoint == null || endpoint.isBlank()) {
+            throw new IllegalArgumentException(prefix + "_ENDPOINT is required when " + prefix + "_ID is set.");
+        }
+
+        neighbors.add(new RegionNeighbor(
+                direction,
+                new RegionId(regionId),
+                endpoint
+        ));
     }
 
     private static String env(String key, String fallback) {
